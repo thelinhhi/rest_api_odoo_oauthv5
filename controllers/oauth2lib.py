@@ -39,30 +39,6 @@ class Oauth2libController(http.Controller):
     """This is a controller which is used to generate responses based on the
     api requests"""
 
-    @http.route('/oauth2/loginpage2',  auth='none', website=True)
-    def index(self, **kw):
-        # TODO: Login Page
-        return """
-   <t t-set="disable_footer" t-value="True"/>
-        <t t-call="web.login_layout">
-            <form class="oe_login_form" role="form" method="post" action="/oauth2/login">
-                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                <div>
-                    <h3 t-esc="oauth_client"/>
-                    Login Page
-                </div>
-                <label>username</label>
-                <input type="text" name="username" t-value="admin"/>
-                <br/>
-                <label>password</label>
-                <input type="text" name="password" t-value="admin"/>
-                <br/>
-                <div class="clearfix oe_login_buttons text-center">
-                    <button type="submit" class="btn btn-primary">Authorize</button>
-                </div>
-            </form>
-        </t>
-"""
 
     @http.route(['/oauth2lib/authorize2'], type="http", auth="none", csrf=False,
                 methods=['GET'])

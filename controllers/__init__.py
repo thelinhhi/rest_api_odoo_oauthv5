@@ -21,6 +21,6 @@
 #############################################################################
 
 from . import main
-from . import oauth2
-from . import oauth2lib
+# from . import oauth2
+# from . import oauth2lib
 

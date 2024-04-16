@@ -36,30 +36,6 @@ class Oauth2Controller(http.Controller):
     """This is a controller which is used to generate responses based on the
     api requests"""
 
-    @http.route(['/oauth2lib/login'], type="http", auth="none", csrf=False,
-                methods=['POST'])
-    def login(self, **kw):   
-        # TODO: Login
-        # if request.session.uid:
-        #     # Redirect if already logged in and redirect param is present
-        #     return http.request.render('rest_api_odoo_oauth.authorization', { })
-
-        username = kw.get('username')
-        password = kw.get('password')
-        db = kw.get('db')
-        db1 = request.session.db
-        print("123")
-        print(db1)
-        try:
-            request.session.update(http.get_default_session(), db=db)
-            auth = request.session.authenticate(db, username, password)
-            return http.request.render(
-                'rest_api_odoo_oauth.authorization', { })
-        
-        except Exception as e: 
-            print(e)
-            return "WrongUSerNamePasswor"
-        
     @http.route('/oauth2lib/loginpage',  auth='none', website=True)
     def index(self, **kw):
         # TODO: Login Page

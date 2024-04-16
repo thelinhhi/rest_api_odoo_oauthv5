@@ -22,50 +22,23 @@
 
 import json
 import logging
+import uuid
 from odoo import http
 from odoo.http import request
+from ..oauthlib import oauth2
+from ..oauthlib import common
+from ..oauth2.validator import OdooValidator
+import werkzeug.utils
+import werkzeug.wrappers
 
+_client_model = "oauth2.client.model"
+_authorization_code_model = "oauth2.authorization.code.model"
 _logger = logging.getLogger(__name__)
-
+_list_db = ['plusidea', 'leasing-platform', 'test', 'db']
 
 class RestApi(http.Controller):
     """This is a controller which is used to generate responses based on the
     api requests"""
-
-    @http.route(['/signin'], type="http", auth="none", csrf=False,
-                methods=['GET'])
-    def signin(self, **kw):
-        "TODO: Get parameters from header"        
-        username = request.httprequest.headers.get('login')
-        password = request.httprequest.headers.get('password')
-        db = request.httprequest.headers.get('db')
-        _logger.warning("username: " + username)
-        _logger.warning("password: " + password)
-        _logger.warning("db: " + db)
-        rs = {}
-        try:
-            request.session.update(http.get_default_session(), db=db)
-            auth = request.session.authenticate(db, username, password)
-            user = request.env['res.users'].browse(auth)
-            api_key = request.env.user.generate_api(username)
-            datas = json.dumps({"Status": "auth successful",
-                                "User": user.name,
-                                "api-key": api_key})
-           
-            return request.make_response(data=datas)
-        except:
-            
-            return "WrongUSerNamePasswor"
-        
-    
-    # @http.route(['/odoo_connect'], type="http", auth="none", csrf=False,
-    #             methods=['GET'])
-    # def odoo_connect(self, **kw):
-    #     """This is the controller which initializes the api transaction by
-    #     generating the api-key for specific user and database"""
-    #     _logger.warning("1123")
-    #     return "Hello1"
-
 
     @http.route("/test", auth='none', type='http', csrf=False, methods=['GET'])
     def get_test(self, **kw):
@@ -73,59 +46,231 @@ class RestApi(http.Controller):
         response = {'message': "Test Test 123"}
         return request.make_response(json.dumps(response), headers={'Content-Type': 'application/json'})
 
+    @http.route('/oauth2lib/loginpage',  auth='none', website=True)
+    def index(self, client_id, redirect_uri, response_type, **kw):
+        # TODO: Login Page
+        http.request.session['oauth_credentials'] = {
+                'client_id': client_id, 
+                'redirect_uri': redirect_uri,
+                'response_type': response_type
+            }
+        return """
+    <t t-set="disable_footer" t-value="True"/>
+        <t t-call="web.login_layout">
+            <form class="oe_login_form" role="form" method="post" action="/oauth2lib/login">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <div>
+                    <h3 t-esc="oauth_client"/>
+                    Login Page
+                </div>
+                <label>username</label>
+                <input type="text" name="username" value="admin"/>
+                <br/>
+                <label>password</label>
+                <input type="text" name="password" value="admin"/>
+                <br/>
+                <!-- <label>db</label>
+                <input type="text" name="db" value="admin"/>
+                <br/> -->
+                <div class="clearfix oe_login_buttons text-center">
+                    <button type="submit" class="btn btn-primary">Authorize</button>
+                </div>
+            </form>
+        </t>
+"""
+        # return http.request.render(
+        #         'rest_api_odoo_oauthv5.oauth2_login_form', { })
+    
+    @http.route(['/oauth2lib/login'], type="http", auth="none", csrf=False,
+                methods=['POST'])
+    def login(self, **kw):   
+        # TODO: Login
+        # if request.session.uid:
+        #     # Redirect if already logged in and redirect param is present
+        #     return http.request.render('rest_api_odoo_oauth.authorization', { })
 
-    @http.route("/user/getInfo", auth='user', type='http', csrf=False, methods=['GET'])
-    def getInfo(self, **kw):
-        user = request.env.user
-        current_user = {
-            "uid": user.id,
-            "name": user.name
+        username = kw.get('username')
+        password = kw.get('password')
+        http.request.session['oauth_credentials'] = {
+                'state': uuid.uuid4(), 
         }
-        print(current_user)
         
-        return request.make_response(json.dumps(current_user), headers={'Content-Type': 'application/json'})
-    
-    @http.route("/sale/orders", auth='none', type='http', csrf=False, methods=['GET'])
-    def getOrders(self, **kw):
-        print("Test")
-        response = {'message': "Test Test 123"}
-        user = request.env.user.id
-        print(user)
-        # current_user = request.env['sale.order'].search([('user_id', '=', user)])
-        current_user = request.env['sale.order'].search([])
-        print(current_user)
-        user = []
-        for rec in current_user: 
-            user.append(rec.name)
-        
-        # current_user = request.env.user.name
-        # user = current_user
-        return request.make_response(json.dumps(user), headers={'Content-Type': 'application/json'})
-    
-    @http.route("/authenticate", auth='none', type='http', csrf=False, methods=['GET'])
-    def getAuthenticate(self, **kw):
-        print("Test")
-        response = {'message': "Test Test 123"}
-        user = request.env.user.id
-        print(user)
-        # current_user = request.env['sale.order'].search([('user_id', '=', user)])
-        current_user = request.env['sale.order'].search([])
-        print(current_user)
-        user = []
-        for rec in current_user: 
-            user.append(rec.name)
-        
-        # current_user = request.env.user.name
-        # user = current_user
-        return request.make_response(json.dumps(user), headers={'Content-Type': 'application/json'})
-    
-    @http.route("/validate_client_id", auth='none', type='http', csrf=False, methods=['GET'])
-    def validate_client_id(self, **kw):
+        for db in _list_db:
+            try:
+                request.session.update(http.get_default_session(), db=db)
+                auth = request.session.authenticate(db, username, password)
+                # return http.request.render(
+                #     'rest_api_odoo_oauthv5.authorization', { })
 
-        client_id = request.httprequest.headers.get('client_id')
-        print("1")
-        search = request.env['oauth2.clien.model'].sudo().search([])
-        data = []
-        for rec in data: 
-            data.append(rec.client_id)
-        return request.make_response(json.dumps(data), headers={'Content-Type': 'application/json'})
+                _logger.info("auth succes with db " + db )
+
+                return werkzeug.utils.redirect("/oauth2lib/authorize?client_id="++""+""+"", code=200)
+            except Exception as e: 
+                _logger.error("db " + db + " not right")
+
+        return "Not found db"
+
+    @http.route(['/oauth2lib/authorize'], type="http", auth="none", csrf=False,
+                methods=['GET'])
+    def authorize_index(self, client_id, **kw):   
+        _logger.info("authorize_index_start: ")
+        # TODO: User login?
+        # if request.session.uid is None:
+        #     # Redirect if already logged in and redirect param is present
+        #     return http.request.redirect('web/login?redirect=oauth2lib/authorize?client_id=' + client_id)
+        
+        # TODO: Database
+        # db = request.session.db
+        # ensure_db(db=db)
+
+        verify_data = http.request.env[_client_model].sudo().search([])
+        verify_data_2 = []
+        for rec in verify_data: 
+            verify_data_2.append(rec.client_id)
+        _logger.info("full database")
+        _logger.info(json.dumps(verify_data_2))
+        # _logger.info(json.dumps(verify_data))
+
+        # TODO: Check client id
+        client = http.request.env['oauth2.client.model'].sudo().search([
+            ('client_id', '=', client_id),
+        ])
+
+        if not client:
+            return "Application dont be registered."
+        
+        # TODO: Valide request
+        oauth2_server = client.get_oauth2_server()
+
+        # Retrieve needed arguments for oauthlib methods
+        uri, http_method, body, headers = self._get_request_information()
+        _logger.info("Check add new value header")
+        try:
+            _logger.info("validate_authorization_request: Start  ")
+            scopes, credentials = oauth2_server.validate_authorization_request(
+                uri, http_method=http_method, body=body, headers=headers)
+            _logger.info("credentials and scopes")
+            _logger.info(scopes)
+            _logger.info(credentials)
+            _logger.info("validate_authorization_request: End  ")
+            # Store some data
+            http.request.session['oauth_scopes'] = scopes
+            http.request.session['oauth_credentials'] = {
+                'client_id': credentials['client_id'],
+                'redirect_uri': credentials['redirect_uri'],
+                'response_type': credentials['response_type'],
+                'state': credentials['state'],
+            }
+        except oauth2.FatalClientError as e:
+            return e
+        except oauth2.OAuth2Error as e:
+            return e
+        except:
+            return e
+        
+        _logger.info("Client: ")
+        oauth_credentials = http.request.session['oauth_credentials']
+        _logger.info(json.dumps(oauth_credentials))
+
+        _logger.info("authorize_index_end: ")
+
+        return http.request.render('rest_api_odoo_oauthv5.authorization', {
+            'client_id': client.client_id,
+            'application_name': client.application_name
+            })
+    
+    @http.route(['/oauth2lib/authorize'], type="http", auth="none", csrf=False,
+                methods=['POST'])
+    def authorize(self, *args, **kwargs):
+        # TODO: Database
+        # db = request.session.db
+        # ensure_db(db=db)
+
+        # TODO: Get Data from session
+        oauth_scopes =  http.request.session['oauth_scopes'] 
+        oauth_credentials =  http.request.session['oauth_credentials'] 
+
+        client = http.request.env['oauth2.client.model'].sudo().search([
+            ('client_id', '=', oauth_credentials['client_id']),
+        ])
+     
+        # TODO: Create authorization code
+        oauth2_server = client.get_oauth2_server()
+        uri, http_method, body, headers = self._get_request_information()
+        try:
+            _logger.info("credentials and scopes")
+            _logger.info(oauth_credentials)
+            _logger.info(oauth_scopes)
+            _logger.info("---------------------------------------- ")
+            _logger.info("create_authorization_response: Start  ")
+            headers, body, status = oauth2_server.create_authorization_response(
+            uri, http_method=http_method, body=body, headers=headers,
+            scopes=oauth_scopes, credentials=oauth_credentials)
+            _logger.info(headers)
+            _logger.info(body)
+            _logger.info(status)
+            _logger.info("create_authorization_response: End  ")
+
+        except oauth2.FatalClientError as e:
+            _logger.info(e)
+        except oauth2.OAuth2Error as e:
+            _logger.info(e)
+        except Exception as e:
+            _logger.info(e)
+        
+        return http.request.render(
+                'rest_api_odoo_oauthv5.oauth2_token_form', { })
+    
+    @http.route(['/oauth2lib/gettoken'], type="http", auth="none", csrf=False,
+                methods=['POST'])
+    def gettoken(self, *args, **kwargs):
+        _logger.info("1")
+        oauth_credentials =  http.request.session['oauth_credentials'] 
+        _logger.info("2")
+        authorization_code = http.request.env[_authorization_code_model].sudo().search([
+            ('client_id.client_id', '=', oauth_credentials['client_id']),
+            ('code', '=', kwargs.get('code')),
+        ])
+        _logger.info("3")
+        _logger.info(authorization_code.code)
+        if not authorization_code:
+            return "Access Denied"
+        _logger.info("4")
+        check_exist_client_id = http.request.env[_client_model].sudo().search([
+            ('client_id', '=', oauth_credentials['client_id']),
+        ])
+
+        if not check_exist_client_id:
+            return "Not Found ClienId"
+        oauth2_server = check_exist_client_id.get_oauth2_server()
+
+        uri, http_method, body, headers = self._get_request_information()
+        credentials = {'scope': []}
+
+        _logger.info("create_token_response: Start  ")
+        headers, body, status = oauth2_server.create_token_response(
+            uri, http_method=http_method, body=body, headers=headers,
+            credentials=credentials)
+        _logger.info(headers)
+        _logger.info(body)
+        _logger.info(status)
+        _logger.info("create_token_response: End  ")
+        # return werkzeug.wrappers.BaseResponse(
+        #     body, status=status, headers=headers)
+        # TODO: Create access token
+        # access_token = "Bearer Token = 123"
+        # http.request.env['oauth2.bearer.token.model'].sudo().create({
+        #     'access_token': access_token,
+        # })
+
+        return body
+
+    def _get_request_information(self):
+        """ Retrieve needed arguments for oauthlib methods """
+        uri = http.request.httprequest.base_url
+        http_method = http.request.httprequest.method
+        body = common.urlencode(
+            http.request.httprequest.values.items())
+        headers = http.request.httprequest.headers
+        return uri, http_method, body, headers
+    
