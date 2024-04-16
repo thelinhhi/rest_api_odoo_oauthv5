@@ -308,7 +308,7 @@ class OdooValidator(RequestValidator):
             - Refresh Token Grant
         """
         _logger.info(inspect.stack()[0][3])
-        return True
+        return False
 
     def save_authorization_code(self, client_id, code, request, *args, **kwargs):
         """Persist the authorization_code.

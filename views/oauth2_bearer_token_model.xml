@@ -13,6 +13,7 @@
                         </group>
                         <group string="Methods">
                             <field name="access_token"/>
+                            <field name="refresh_token"/>
                             <!-- <field name="is_post"/>
                             <field name="is_put"/>
                             <field name="is_delete"/> -->
@@ -30,7 +31,8 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="access_token" string="Model"/>
-                <field name="access_token"/>
+                <field name="refresh_token"/>
+                <!-- <field name="refresh_token"/> -->
                 <!-- <field name="is_post"/>
                 <field name="is_put"/>
                 <field name="is_delete"/> -->

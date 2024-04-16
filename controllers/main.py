@@ -33,6 +33,8 @@ import werkzeug.wrappers
 
 _client_model = "oauth2.client.model"
 _authorization_code_model = "oauth2.authorization.code.model"
+_bearer_token_model = "oauth2.bearer.token.model"
+
 _logger = logging.getLogger(__name__)
 _list_db = ['plusidea', 'leasing-platform', 'test', 'db']
 
@@ -272,6 +274,79 @@ class RestApi(http.Controller):
 
         return body
 
+    @http.route(['/oauth2lib/refresh_token'], type="http", auth="none", csrf=False,
+                methods=['POST'])
+    def refresh_token(self, client_id = None, refresh_token=None, *args, **kwargs):
+
+        check_refresh_token = http.request.env[_bearer_token_model].sudo().search([
+            ('refresh_token', '=', refresh_token),
+        ])
+
+        _logger.info("3")
+
+        if not check_refresh_token:
+            return "Access Denied"
+        
+        _logger.info(check_refresh_token.access_token)
+        _logger.info(check_refresh_token.refresh_token)
+        _logger.info("4")
+        check_exist_client_id = http.request.env[_client_model].sudo().search([
+            ('client_id', '=', client_id),
+        ])
+
+        if not check_exist_client_id:
+            return "Not Found ClienId"
+        
+        oauth2_server = check_exist_client_id.get_oauth2_server()
+
+        uri, http_method, body, headers = self._get_request_information()
+        credentials = {'scope': []}
+
+        _logger.info("create_token_response: Start  ")
+        headers, body, status = oauth2_server.create_token_response(
+            uri, http_method=http_method, body=body, headers=headers,
+            credentials=credentials)
+        
+        _logger.info(headers)
+        _logger.info(body)
+        _logger.info(status)
+        _logger.info("create_token_response: End  ")
+        # return werkzeug.wrappers.BaseResponse(
+        #     body, status=status, headers=headers)
+        # TODO: Create access token
+        # access_token = "Bearer Token = 123"
+        # http.request.env['oauth2.bearer.token.model'].sudo().create({
+        #     'access_token': access_token,
+        # })
+
+        return body
+    
+
+    @http.route(['/oauth2lib/getInfo'], type="http", auth="none", csrf=False,
+                methods=['GET'])
+    def getInfo(self, *args, **kwargs):
+        
+        _logger.info("1")
+        access_token = http.request.httprequest.headers['Authorization']
+        _logger.info("2")
+        _logger.info(access_token)
+        check_access_token = http.request.env['oauth2.bearer.token.model'].sudo().search([
+            ('access_token', '=', access_token),
+        ])
+        _logger.info("3")
+        # data = http.request.env['res.user'].sudo().search([ ])
+        current_user = request.env['res.partner'].sudo().search([])
+        _logger.info("4")
+        if not check_access_token:
+            return "Access Denied"
+        _logger.info("5")
+        _logger.info(current_user)
+        user = []
+        for rec in current_user: 
+            user.append(rec.name)
+            user.append(rec.name)
+        _logger.info("6")
+        return request.make_response(json.dumps(user), headers={'Content-Type': 'application/json'})
     
     def _get_request_information(self):
         """ Retrieve needed arguments for oauthlib methods """
