@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_connection_api,connection.api,model_connection_api,,1,1,1,1
+access_oauth2_client_model,oauth2.client.model,model_oauth2_client_model,,1,1,1,1
+access_oauth2_authorization_code_model,oauth2.authorization.code.model,model_oauth2_authorization_code_model,,1,1,1,1
+access_oauth2_bearer_token_model,oauth2.bearer.token.model,model_oauth2_bearer_token_model,,1,1,1,1

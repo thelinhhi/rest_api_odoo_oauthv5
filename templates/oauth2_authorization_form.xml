@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <template id="rest_api_odoo_oauthv5.authorization" name="OAuth Authorization LoginForm">
+        <form role="form" method="post" action="/oauth2lib/authorize">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <div>
+                    <h3 t-esc="application_name"/>
+                    This application would like to access these resources :
+                </div>
+                <!-- <label>Mã app đăng ký</label>
+                <input type="text" name="client_id" value= "{{client_id}}"/>
+                <br/> -->
+                <!-- <label>response_type</label> -->
+                <input type="text" name="response_type" value="code"/>
+                <!-- <br/>
+                <label>redirect_uri = localhost</label> -->
+                <input type="text" name="redirect_uri"/>
+                <div class="clearfix oe_login_buttons text-center">
+                    <button type="submit" class="btn btn-primary">Authorize</button>
+                </div>
+            </form>
+    </template>
+    <template id="rest_api_odoo_oauthv5.authorization_error" name="OAuth Authorization Error">
+        <t t-set="disable_footer" t-value="True"/>
+        <t t-call="web.login_layout">
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <h3 t-esc="title"/>
+                </div>
+                <div class="panel-body" t-esc="message"/>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form view for 'connection.api' model.  -->
+    <record id="oauth2_authorization_code_model_view_form" model="ir.ui.view">
+        <field name="name">oauth2.authorization.code.model.view.form</field>
+        <field name="model">oauth2.authorization.code.model</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Resource">
+                            <field name="code"/>
+                        </group>
+                        <group string="Methods">
+                            <field name="code"/>
+                            <!-- <field name="is_post"/>
+                            <field name="is_put"/>
+                            <field name="is_delete"/> -->
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- Tree view for 'connection.api' model.  -->
+
+    <record id="oauth2_authorization_code_model_view_tree" model="ir.ui.view">
+        <field name="name">oauth2.authorization.code.model.view.tree</field>
+        <field name="model">oauth2.authorization.code.model</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="client_id" />
+                <field name="code"/>
+                <!-- <field name="is_post"/>
+                <field name="is_put"/>
+                <field name="is_delete"/> -->
+            </tree>
+        </field>
+    </record>
+    <!-- Action  for 'connection.api' model with Tree and form views.  -->
+
+    <record id="oauth2_authorization_code_model_action" model="ir.actions.act_window">
+        <field name="name">OAuth authorization Records</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">oauth2.authorization.code.model</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create!
+            </p>
+        </field>
+    </record>
+    <!-- Menu items for the REST API.  -->
+
+    <menuitem id="oauth2_authorization_code_model_root"   
+              name="OAuth Authorization"
+              sequence="10"
+              web_icon="rest_api_odoo,static/description/icon.png"/>
+    <menuitem id="oauth2_authorization_code_model_details"
+              name="OAuth Authorization"
+              parent="oauth2_authorization_code_model_root"
+              action="oauth2_authorization_code_model_action"
+              sequence="10"/>
+</odoo>

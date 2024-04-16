@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright 2016 SYLEAM
+    License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+    <template id="rest_api_odoo_oauthv5.oauth2_token_form" name="OAuth Authorization LoginForm">
+        <!-- <t t-set="disable_footer" t-value="True"/>
+        <t t-call="web.login_layout"> -->
+            <form class="oe_login_form" role="form" method="post" action="/oauth2lib/gettoken">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <div>
+                    <h3 t-esc="oauth_client"/>
+                    Get Token
+                </div>
+                <!-- <label>client_id Mã app đăng ký</label>
+                <input type="text" name="client_id"/>
+                <br/> -->
+                <label>Authorization code </label>
+                <input type="text" name="code"/>
+                <br/>
+                <label>grant_type </label>
+                <input type="text" name="grant_type" value="authorization_code"/>
+                <div class="clearfix oe_login_buttons text-center">
+                    <button type="submit" class="btn btn-primary">Authorize</button>
+                </div>
+            </form>
+        <!-- </t> -->
+    </template>
+
+</odoo>

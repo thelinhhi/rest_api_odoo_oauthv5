@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form view for 'connection.api' model.  -->
+    <record id="oauth2_client_model_view_form" model="ir.ui.view">
+        <field name="name">oauth2.client.model.view.form</field>
+        <field name="model">oauth2.client.model</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Application">
+                            <field name="client_id"/>
+                            <field name="application_name"/>
+                        </group>
+                        <group string="Inforamation">
+                            <field name="client_secret"/>
+                            <field name="user_id" widget="many2one_tags"/>
+                            <field name="skip_authorization"/>
+                            <field name="application_type"/>
+                            <field name="grant_type"/>
+                            <field name="response_type"/>
+                            
+                            <!-- <field name="token_type"/> -->
+
+                            <!-- <field name="is_post"/>
+                            <field name="is_put"/>
+                            <field name="is_delete"/> -->
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- Tree view for 'connection.api' model.  -->
+
+    <record id="oauth2_client_model_view_tree" model="ir.ui.view">
+        <field name="name">oauth2.client.model.view.tree</field>
+        <field name="model">oauth2.client.model</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="client_id"/>
+                            <field name="client_secret"/>
+                            <field name="application_name"/>
+                            <field name="user_id" widget="many2one_tags"/>
+                            <field name="skip_authorization"/>
+                            <field name="application_type"/>
+                            <field name="grant_type"/>
+                            <field name="response_type"/>
+                <!-- <field name="is_post"/>
+                <field name="is_put"/>
+                <field name="is_delete"/> -->
+            </tree>
+        </field>
+    </record>
+    <!-- Action  for 'connection.api' model with Tree and form views.  -->
+
+    <record id="oauth2_client_model_action" model="ir.actions.act_window">
+        <field name="name">OAuth Client Records</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">oauth2.client.model</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create!
+            </p>
+        </field>
+    </record>
+    <!-- Menu items for the REST API.  -->
+
+    <menuitem id="rest_api_root_123456"   
+              name="Oauth Client"
+              sequence="10"
+              web_icon="rest_api_odoo,static/description/icon.png"/>
+    <menuitem id="rest_api_details_root56156"
+              name="Oauth Client"
+              parent="rest_api_root_123456"
+              action="oauth2_client_model_action"
+              sequence="10"/>
+</odoo>
