@@ -62,7 +62,7 @@ class OdooValidator(RequestValidator):
         .. _`Section 6`: https://tools.ietf.org/html/rfc6749#section-6
         """
 
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
         self._load_client(request)
         return request.client.grant_type in (
             'password',
@@ -105,16 +105,16 @@ class OdooValidator(RequestValidator):
 
         .. _`HTTP Basic Authentication Scheme`: https://tools.ietf.org/html/rfc1945#section-11.1
         """
-        print(inspect.stack()[0][3])
-        print("ByPass")
+        _logger.info(inspect.stack()[0][3])
+        _logger.info("ByPass")
 
         return True
         raise NotImplementedError('authenticate_client Subclasses must implement this method.')
 
     def authenticate_client_id(self, client_id, request, *args, **kwargs):
         """ Ensure client_id belong to a non-confidential client """
-        print(inspect.stack()[0][3])
-        print("ByPass")
+        _logger.info(inspect.stack()[0][3])
+        _logger.info("ByPass")
         return True
         # raise NotImplementedError('authenticate_client_id Subclasses must implement this method.')
 
@@ -140,8 +140,8 @@ class OdooValidator(RequestValidator):
         Method is used by:
             - Authorization Code Grant (during token request)
         """
-        print(inspect.stack()[0][3])
-        print("ByPass")
+        _logger.info(inspect.stack()[0][3])
+        _logger.info("ByPass")
         return True
         # raise NotImplementedError('confirm_redirect_uri Subclasses must implement this method.')
 
@@ -157,12 +157,12 @@ class OdooValidator(RequestValidator):
             - Authorization Code Grant
             - Implicit Grant
         """
-        print(inspect.stack()[0][3])
-        print(client_id)
+        _logger.info(inspect.stack()[0][3])
+        _logger.info(client_id)
         client = http.request.env['oauth2.client.model'].search([
             ('client_id', '=', client_id),
         ])
-        print("ByPass")
+        _logger.info("ByPass")
         return "http://localhost:8069"
 
     def get_default_scopes(self, client_id, request, *args, **kwargs):
@@ -179,8 +179,8 @@ class OdooValidator(RequestValidator):
             - Resource Owner Password Credentials Grant
             - Client Credentials grant
         """
-        print(inspect.stack()[0][3])
-        print("ByPass")
+        _logger.info(inspect.stack()[0][3])
+        _logger.info("ByPass")
         return ['']
         # raise NotImplementedError('get_default_scopes Subclasses must implement this method.')
 
@@ -195,7 +195,7 @@ class OdooValidator(RequestValidator):
         Method is used by:
             - Refresh token grant
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
         raise NotImplementedError('get_original_scopes Subclasses must implement this method.')
 
     def is_within_original_scope(self, request_scopes, refresh_token, request, *args, **kwargs):
@@ -218,7 +218,7 @@ class OdooValidator(RequestValidator):
         Method is used by:
             - Refresh token grant
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
         return False
 
     def introspect_token(self, token, token_type_hint, request, *args, **kwargs):
@@ -261,7 +261,7 @@ class OdooValidator(RequestValidator):
         .. _`Introspect Claims`: https://tools.ietf.org/html/rfc7662#section-2.2
         .. _`JWT Claims`: https://tools.ietf.org/html/rfc7519#section-4
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
         raise NotImplementedError(' introspect_token Subclasses must implement this method.')
 
     def invalidate_authorization_code(self, client_id, code, request, *args, **kwargs):
@@ -275,8 +275,8 @@ class OdooValidator(RequestValidator):
         Method is used by:
             - Authorization Code Grant
         """
-        print(inspect.stack()[0][3])
-        print("ByPass")
+        _logger.info(inspect.stack()[0][3])
+        _logger.info("ByPass")
         # raise NotImplementedError('invalidate_authorization_code Subclasses must implement this method.')
 
     def revoke_token(self, token, token_type_hint, request, *args, **kwargs):
@@ -290,7 +290,7 @@ class OdooValidator(RequestValidator):
         Method is used by:
             - Revocation Endpoint
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
         raise NotImplementedError('revoke_token Subclasses must implement this method.')
 
     def rotate_refresh_token(self, request):
@@ -307,7 +307,7 @@ class OdooValidator(RequestValidator):
         Method is used by:
             - Refresh Token Grant
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
         return True
 
     def save_authorization_code(self, client_id, code, request, *args, **kwargs):
@@ -344,14 +344,14 @@ class OdooValidator(RequestValidator):
         Method is used by:
             - Authorization Code Grant
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
 
         # redirect_uri = http.request.env['oauth.provider.redirect.uri'].search([
         #     ('name', '=', request.redirect_uri),
         # ])
-        print(code)
-        print(request.client.id)
-        print(request.odoo_user.id)
+        _logger.info(code)
+        _logger.info(request.client.id)
+        _logger.info(request.odoo_user.id)
         try:
             http.request.env['oauth2.authorization.code.model'].sudo().create({
                 'code': code['code'],
@@ -362,7 +362,7 @@ class OdooValidator(RequestValidator):
                 #     lambda record: record.code in request.scopes).ids)],
             })
         except Exception as e:
-            print(e)
+            _logger.info(e)
 
         # raise NotImplementedError('save_authorization_code Subclasses must implement this method.')
 
@@ -375,7 +375,7 @@ class OdooValidator(RequestValidator):
         :param request: OAuthlib request.
         :type request: oauthlib.common.Request
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
         return self.save_bearer_token(token, request, *args, **kwargs)
 
     def save_bearer_token(self, token, request, *args, **kwargs):
@@ -426,11 +426,15 @@ class OdooValidator(RequestValidator):
             - Resource Owner Password Credentials Grant (might not associate a client)
             - Client Credentials grant
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
 
-        print("ByPass")
+        _logger.info("ByPass")
+
         http.request.env['oauth2.bearer.token.model'].sudo().create({
-            'access_token': token,
+            'access_token': token['access_token'],
+            'expires_in':  token['expires_in'],
+            'token_type':  token['token_type'],
+            'refresh_token':  token['refresh_token'],
         })
         
         return "http://localhost:8069/"
@@ -486,7 +490,7 @@ class OdooValidator(RequestValidator):
             - Resource Owner Password Credentials Grant
             - Client Credentials Grant
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
         raise NotImplementedError('validate_bearer_token Subclasses must implement this method.')
 
     def validate_client_id(self, client_id, request, *args, **kwargs):
@@ -505,8 +509,8 @@ class OdooValidator(RequestValidator):
             - Authorization Code Grant
             - Implicit Grant
         """
-        print(inspect.stack()[0][3])
-        print("ByPass")
+        _logger.info(inspect.stack()[0][3])
+        _logger.info("ByPass")
         self._load_client(request)
         return True
         # raise NotImplementedError('validate_client_id Subclasses must implement this method.')
@@ -544,8 +548,8 @@ class OdooValidator(RequestValidator):
         Method is used by:
             - Authorization Code Grant
         """
-        print(inspect.stack()[0][3])
-        print("ByPass")
+        _logger.info(inspect.stack()[0][3])
+        _logger.info("ByPass")
         return True
         # raise NotImplementedError('validate_code Subclasses must implement this method.')
 
@@ -565,8 +569,8 @@ class OdooValidator(RequestValidator):
             - Client Credentials Grant
             - Refresh Token Grant
         """
-        print(inspect.stack()[0][3])
-        print("ByPass")
+        _logger.info(inspect.stack()[0][3])
+        _logger.info("ByPass")
         return True
         # raise NotImplementedError('validate_grant_type Subclasses must implement this method.')
 
@@ -586,8 +590,8 @@ class OdooValidator(RequestValidator):
             - Authorization Code Grant
             - Implicit Grant
         """
-        print(inspect.stack()[0][3])
-        print("ByPass")
+        _logger.info(inspect.stack()[0][3])
+        _logger.info("ByPass")
 
         return True
         # return request.client.identifier == client_id and \
@@ -611,7 +615,7 @@ class OdooValidator(RequestValidator):
             - Resource Owner Password Credentials Grant (also indirectly)
             - Refresh Token Grant
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
         raise NotImplementedError('validate_refresh_token Subclasses must implement this method.')
 
     def validate_response_type(self, client_id, response_type, client, request, *args, **kwargs):
@@ -628,12 +632,12 @@ class OdooValidator(RequestValidator):
             - Authorization Code Grant
             - Implicit Grant
         """
-        print(inspect.stack()[0][3])
-        print("ByPass")
+        _logger.info(inspect.stack()[0][3])
+        _logger.info("ByPass")
         return True
         # return request.client.client_id == client_id and \
         #     response_type == request.client.response_type
-        # print("validate_response_type")
+        # _logger.info("validate_response_type")
         # raise NotImplementedError('validate_response_type Subclasses must implement this method.')
 
     def validate_scopes(self, client_id, scopes, client, request, *args, **kwargs):
@@ -652,8 +656,8 @@ class OdooValidator(RequestValidator):
             - Resource Owner Password Credentials Grant
             - Client Credentials Grant
         """
-        print(inspect.stack()[0][3])
-        print("ByPass")
+        _logger.info(inspect.stack()[0][3])
+        _logger.info("ByPass")
         return True
 
         raise NotImplementedError('validate_scopes Subclasses must implement this method.')
@@ -676,7 +680,7 @@ class OdooValidator(RequestValidator):
         Method is used by:
             - Resource Owner Password Credentials Grant
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
         raise NotImplementedError('validate_user Subclasses must implement this method.')
 
     def is_pkce_required(self, client_id, request):
@@ -703,7 +707,9 @@ class OdooValidator(RequestValidator):
 
         .. _`RFC7636`: https://tools.ietf.org/html/rfc7636
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
+        _logger.info("Disable pkce")
+        
         return False
 
     def get_code_challenge(self, code, request):
@@ -733,7 +739,7 @@ class OdooValidator(RequestValidator):
             - Authorization Code Grant - when PKCE is active
 
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
         return None
 
     def get_code_challenge_method(self, code, request):
@@ -754,7 +760,7 @@ class OdooValidator(RequestValidator):
             - Authorization Code Grant - when PKCE is active
 
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
         raise NotImplementedError('get_code_challenge_method Subclasses must implement this method.')
 
     def is_origin_allowed(self, client_id, origin, request, *args, **kwargs):
@@ -781,7 +787,7 @@ class OdooValidator(RequestValidator):
             - Refresh Token Grant
 
         """
-        print(inspect.stack()[0][3])
+        _logger.info(inspect.stack()[0][3])
         return False
     
 

@@ -18,4 +18,14 @@ class Oauth2BearerTokenModel(models.Model):
                       'Choose another value - it has to be unique!')
     ]
 
-    expires_at = fields.Datetime()
+    device_id = fields.Char(string='Device Id')
+    
+    expires_in = fields.Integer()
+
+    token_type = fields.Char(string="Token type", size=100, 
+                          help="")
+    
+    refresh_token = fields.Char(string="Refresh token", size=100, 
+                          help="")
+
+    # scope = fields.

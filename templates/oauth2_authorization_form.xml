@@ -12,10 +12,10 @@
                 <input type="text" name="client_id" value= "{{client_id}}"/>
                 <br/> -->
                 <!-- <label>response_type</label> -->
-                <input type="text" name="response_type" value="code"/>
+                <!-- <input type="text" name="response_type" value="code"/> -->
                 <!-- <br/>
                 <label>redirect_uri = localhost</label> -->
-                <input type="text" name="redirect_uri"/>
+                <!-- <input type="text" name="redirect_uri"/> -->
                 <div class="clearfix oe_login_buttons text-center">
                     <button type="submit" class="btn btn-primary">Authorize</button>
                 </div>

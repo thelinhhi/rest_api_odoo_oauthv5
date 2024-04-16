@@ -91,12 +91,11 @@ class RestApi(http.Controller):
 
         username = kw.get('username')
         password = kw.get('password')
-        http.request.session['oauth_credentials'] = {
-                'state': uuid.uuid4(), 
-        }
-        
+        oauth_credentials = http.request.session['oauth_credentials']
+
         for db in _list_db:
             try:
+                _logger.info("auth with db " + db )
                 request.session.update(http.get_default_session(), db=db)
                 auth = request.session.authenticate(db, username, password)
                 # return http.request.render(
@@ -104,16 +103,24 @@ class RestApi(http.Controller):
 
                 _logger.info("auth succes with db " + db )
 
-                return werkzeug.utils.redirect("/oauth2lib/authorize?client_id="++""+""+"", code=200)
+                # return werkzeug.utils.redirect("/oauth2lib/authorize?client_id="+oauth_credentials['client_id'], code=200)
+                # url = "/oauth2lib/authorize?client_id="+oauth_credentials['client_id']+"%26response_type="+oauth_credentials['response_type']+ "%26redirect_uri="+oauth_credentials['redirect_uri']
+                url = "/oauth2lib/authorize?client_id="+oauth_credentials['client_id']+"&response_type="+oauth_credentials['response_type']+ "&redirect_uri="+oauth_credentials['redirect_uri']
+                
+                _logger.info(url)
+                return werkzeug.utils.redirect(url, code=200)
             except Exception as e: 
+                _logger.error(e)
                 _logger.error("db " + db + " not right")
 
         return "Not found db"
 
     @http.route(['/oauth2lib/authorize'], type="http", auth="none", csrf=False,
                 methods=['GET'])
-    def authorize_index(self, client_id, **kw):   
+    def authorize_index(self, client_id, response_type=None, redirect_uri=None, **kw):   
         _logger.info("authorize_index_start: ")
+        _logger.info(response_type)
+        _logger.info(http.request.httprequest.full_path)
         # TODO: User login?
         # if request.session.uid is None:
         #     # Redirect if already logged in and redirect param is present
@@ -265,6 +272,7 @@ class RestApi(http.Controller):
 
         return body
 
+    
     def _get_request_information(self):
         """ Retrieve needed arguments for oauthlib methods """
         uri = http.request.httprequest.base_url

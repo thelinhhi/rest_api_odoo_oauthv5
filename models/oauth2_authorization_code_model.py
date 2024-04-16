@@ -32,6 +32,8 @@ class Oauth2AuthorizationCodeModel(models.Model):
     		       string='Client Id')
     user_id = fields.Text()
     
+    device_id = fields.Char(string='Device Id')
+    
     scopes = fields.Text()
 
     redirect_uris = fields.Text()
